@@ -49,7 +49,7 @@ namespace LibraryManagement.Controller
             bookList.Add(book);
             Console.WriteLine($"Book with ID {book.Id} added successfully.");
         }
-        public void RemoveBookbyId(string bookId)
+        public void RemoveBookById(string bookId)
         {
             Book bookToRemove = bookList.FirstOrDefault(b => b.Id == bookId);
             if (bookToRemove != null)
@@ -117,7 +117,7 @@ namespace LibraryManagement.Controller
         {
             return bookList.FirstOrDefault(b => b.Id == bookId);
         }
-        public bool BorrowBook(string bookId)
+        public bool BorrowBook(string bookId, string userId)
         {
             Book bookToBorrow = bookList.FirstOrDefault(b => b.Id == bookId);
             if (bookToBorrow != null)
@@ -125,56 +125,84 @@ namespace LibraryManagement.Controller
                 if (bookToBorrow.IsAvailable)
                 {
                     bookToBorrow.IsAvailable = false;
+                    bookToBorrow.BorrowerId = userId;
                     return true;
                 }
             }
             return false;
         }
-        public bool ReturnBook(string bookId)
+        public bool ReturnBook(string bookId, string userId)
         {
             Book bookToReturn = bookList.FirstOrDefault(b => b.Id == bookId);
             if (bookToReturn != null)
             {
                 bookToReturn.IsAvailable = false;
+                bookToReturn.BorrowerId = userId;
                 return true;
             }
             return false;
         }
-        public void SetAvailability(string bookId, bool isAvailable)
+        public void SetAvailability(string bookId)
         {
-            // Find the book in the list
+ 
             Book bookToUpdate = bookList.FirstOrDefault(b => b.Id == bookId);
 
             if (bookToUpdate != null)
             {
-                // Check if the book is currently borrowed
-                if (bookToUpdate.IsAvailable != isAvailable)
+                if (!bookToUpdate.IsAvailable)
                 {
-                    // Output the borrower's information
                     Console.WriteLine($"The book '{bookToUpdate.Title}' (ID: {bookToUpdate.Id}) is currently borrowed by Member ID: {bookToUpdate.BorrowerId}");
-                    if (isAvailable == false && bookToUpdate.BorrowerId == null)
+                    Console.WriteLine("Do you really want to change the status? (Type 'yes' or 'no' to confirm)");
+                    string command = Console.ReadLine();
+                    if (command?.ToLower() == "yes")
                     {
-                        Console.WriteLine("This book can't edit avalibility since no one is borrowing!");
-                        Screen.WaitScreen();
-                        return;
+                        // Change the book's status to available
+                        bookToUpdate.IsAvailable = true;
+                        bookToUpdate.BorrowerId = null; // Clear borrower information
+                        Console.WriteLine("The book status has been updated to 'Available'.");
                     }
                     else
                     {
-                        bookToUpdate.IsAvailable = true;
-                        Screen.WaitScreen();
-                        return;
+                        Console.WriteLine("No changes have been made.");
                     }
                 }
-
-                // Update the availability
-                bookToUpdate.IsAvailable = isAvailable;
+                else
+                {
+                    Console.WriteLine($"The book '{bookToUpdate.Title}' (ID: {bookToUpdate.Id}) is already available.");
+                }
             }
             else
             {
                 Console.WriteLine($"No book found with ID: {bookId}");
-                Screen.WaitScreen();
             }
         }
+        
+        public void SearchBookByBorrowerId(string borrowerId)
+        {
+            // Check if the borrower ID is valid
+            if (string.IsNullOrEmpty(borrowerId))
+            {
+                Console.WriteLine("Borrower ID cannot be empty. Please provide a valid ID.");
+                return;
+            }
+
+            // Find books borrowed by the specified borrower ID
+            var borrowedBooks = bookList.Where(b => b.BorrowerId == borrowerId).ToList();
+
+            if (borrowedBooks.Any())
+            {
+                Console.WriteLine($"Books borrowed by Borrower ID: {borrowerId}");
+                foreach (var book in borrowedBooks)
+                {
+                    Console.WriteLine($"- Title: {book.Title}, ID: {book.Id}");
+                }
+            }
+            else
+            {
+                Console.WriteLine($"No books found for Borrower ID: {borrowerId}");
+            }
+        }
+
         public void WriteToFile()
         {
             try

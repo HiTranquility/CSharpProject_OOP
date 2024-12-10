@@ -27,7 +27,7 @@ namespace LibraryManagement.Controller
         {
             try
             {
-                var memberList = GetPersonList();
+                var memberList = PersonList;
                 if (memberList == null || memberList.Count == 0)
                 {
                     Console.WriteLine("No member data to write to the file.");

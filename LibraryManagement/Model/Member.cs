@@ -42,7 +42,7 @@ namespace LibraryManagement.Model
             Console.WriteLine("+------------+----------------------------+---------------------------+---------------------------+------------+");
             foreach (var book in borrowedBooks)
             {
-                Console.WriteLine($"| {book.Id,-11} | {book.Title,-25} | {book.Author,-26} | {book.Genre,-24} | {book.PublicationDate:MM/dd/yyyy} |");
+                Console.WriteLine($"| {book.Id,-10} | {book.Title,-26} | {book.Author,-25} | {book.Genre,-25} | {book.PublicationDate:MM/dd/yyyy} |");
             }
             Console.WriteLine("+------------+----------------------------+---------------------------+---------------------------+------------+");
         }
@@ -91,7 +91,6 @@ namespace LibraryManagement.Model
             {
                 Console.WriteLine($"Error reading book data from file: {ex.Message}");
             }
-
             return bookList;
         }
     }

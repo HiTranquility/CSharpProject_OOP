@@ -37,37 +37,48 @@ namespace LibraryManagement.View
             };
         }
 
-        public void GetUpdateBookInput(out string bookIdToUpdate, out string newTitle, out string newAuthor, out string newGenre, out bool newAvailability, out DateTime newPublicationDate)
+        public Book GetUpdateBookInput(string bookIdToUpdate)
         {
-            Console.WriteLine("Enter Book ID to update:");
-            bookIdToUpdate = Console.ReadLine();
 
             Console.WriteLine("Enter New Title:");
-            newTitle = Console.ReadLine();
+            string newTitle = Console.ReadLine();
 
             Console.WriteLine("Enter New Author:");
-            newAuthor = Console.ReadLine();
+            string newAuthor = Console.ReadLine();
 
             Console.WriteLine("Enter New Genre:");
-            newGenre = Console.ReadLine();
+            string newGenre = Console.ReadLine();
 
-            Console.WriteLine("Enter New Publication Date (YYYY-MM-DD):");
-            string date = Console.ReadLine();
-            newPublicationDate = Screen.GetValidDate(date);
+            Console.WriteLine("Enter Member Date of Birth (YYYY-MM-DD):");
+            DateTime newPublicationDate;
+            while (!DateTime.TryParse(Console.ReadLine(), out newPublicationDate))
+            {
+                Console.WriteLine("Invalid date format. Please enter again (YYYY-MM-DD):");
+            }
 
             Console.WriteLine("Is the book available? (yes/no):");
             string availabilityInput = Console.ReadLine();
-            newAvailability = availabilityInput.ToLower() == "yes";
+            bool newAvailability = availabilityInput.ToLower() == "yes";
+
+            Book updatedBook = new Book
+            {
+                Id = bookIdToUpdate,
+                Title = newTitle,
+                Author = newAuthor,
+                Genre = newGenre,
+                PublicationDate = newPublicationDate,
+                IsAvailable = newAvailability
+            };
+
+            return updatedBook;
         }
 
-        // Get input to remove a book
         public string GetBookIdForRemoval()
         {
             Console.WriteLine("Enter Book ID to remove:");
             return Console.ReadLine();
         }
 
-        // Get input to search for a book
         public string GetBookIdForSearch()
         {
             Console.WriteLine("Enter Book ID to search:");
@@ -78,15 +89,14 @@ namespace LibraryManagement.View
             return Console.ReadLine();
         }
 
-        // Book management menu
-        public static void LibrarianMenu(BookControl bookControl, LibrarianView librarianView)
+        public static void LibrarianMenu(BookControl bookControl, LibrarianView librarianView, string userID)
         {
             bool librarianExit = false;
             while (!librarianExit)
             {
                 Console.Clear();
                 Console.WriteLine("====================================");
-                Console.WriteLine("       Book Management Menu         ");
+                Console.WriteLine("        Book Management Menu        ");
                 Console.WriteLine("====================================");
                 Console.WriteLine("| 1. Add Book                      |");
                 Console.WriteLine("| 2. Update Book                   |");
@@ -105,23 +115,20 @@ namespace LibraryManagement.View
                     case "1":
                         Book newBook = librarianView.GetNewBookInput();
                         bookControl.AddBook(newBook);
-                        Screen.DisplaySuccessMessage("Book added successfully.");
                         break;
 
                     case "2":
-                        librarianView.GetUpdateBookInput(out string bookId, out string newTitle, out string newAuthor, out string newGenre, out bool newAvailability, out DateTime newPublicationDate);
-                        bookControl.UpdateBook(bookId, newTitle, newAuthor, newGenre, newAvailability, newPublicationDate);
-                        Screen.DisplaySuccessMessage("Book updated successfully.");
+                        string bookIdToUpdate = Screen.InputId();
+                        Book updateInfo = librarianView.GetUpdateBookInput(bookIdToUpdate);
+                        bookControl.UpdateBookbyId(bookIdToUpdate, updateInfo);
                         break;
 
                     case "3":
                         string bookIdToRemove = librarianView.GetBookIdForRemoval();
-                        bookControl.RemoveBook(bookIdToRemove);
-                        Screen.DisplaySuccessMessage("Book removed successfully.");
+                        bookControl.RemoveBookById(bookIdToRemove);
                         break;
 
                     case "4":
-                        Thread.Sleep(1000);
                         bookControl.DisplayAllBooks();
                         break;
 
@@ -130,20 +137,13 @@ namespace LibraryManagement.View
                         bookControl.DisplayBookDetails(bookIdToSearch);
                         break;
                     case "6":
-                        Thread.Sleep(1000);
                         bookControl.DisplayAllBooks();
                         string bookIdToSet = librarianView.GetBookIdForSearch();
-                        Console.WriteLine("Type yes/no to set Availability: ");
-                        string availabilityInput = Console.ReadLine().Trim().ToLower();
-                        bool availability = availabilityInput == "yes";
-                        bookControl.SetAvailability(bookIdToSet, availability);
+                        bookControl.SetAvailability(bookIdToSet);
                         break;
                     case "7":
-                        string booktoSearch = librarianView.GetBorrowerId();
-                        bookControl.SearchBookById(booktoSearch);
-                        
-
-
+                        string borrowerIdtoSearch = librarianView.GetBorrowerId();
+                        bookControl.SearchBookByBorrowerId(borrowerIdtoSearch);
                         break;
                     case "8":
                         bookControl.WriteToFile();

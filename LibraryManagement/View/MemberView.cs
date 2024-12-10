@@ -18,14 +18,12 @@ namespace LibraryManagement.View
             if (currentMember != null)
             {
                 Console.WriteLine("Member logged in successfully!");
-                userID = currentMember.Id; // Lưu userID từ thành viên đã đăng nhập
+                userID = currentMember.Id; 
             }
             else
             {
                 Console.WriteLine("Member not found! Please check your Username or Password.");
-                Console.WriteLine("Press any key to return to the main menu...");
-                Console.ReadKey();
-                // Quay lại menu chính
+                Screen.WaitScreen();
                 return;
             }
 
@@ -33,7 +31,7 @@ namespace LibraryManagement.View
             {
                 Console.Clear();
                 Console.WriteLine("====================================");
-                Console.WriteLine("         Member Menu               ");
+                Console.WriteLine("           Member Menu              ");
                 Console.WriteLine("====================================");
                 Console.WriteLine($"| 1. View My Information           |");
                 Console.WriteLine($"| 2. Borrow Book                   |");
@@ -49,18 +47,16 @@ namespace LibraryManagement.View
                 switch (choice)
                 {
                     case "1":
-                        memberControl.DisplayPersonDetails(currentMember.GetId());
+                        memberControl.DisplayPersonDetails(currentMember.Id);
                         Screen.WaitScreen();
                         break;
 
                     case "2":
                         bookControl.DisplayAllBooks();
                         Console.Write("Enter Book ID to borrow: ");
-                        string bookIdToBorrow = Console.ReadLine();
-                        if (bookControl.BorrowBook(bookIdToBorrow, userID))
+                        string bookIdToBorrow = Screen.InputId();
+                        if (bookControl.BorrowBook(bookIdToBorrow,userID))
                         {
-                            bool availability = false;
-                            bookControl.SetAvailability(bookIdToBorrow, availability);
                             Book book = bookControl.GetBookById(bookIdToBorrow);
                             memberControl.GetPersonById(userID).BorrowedBooks.Add(book);
                         }
@@ -69,18 +65,16 @@ namespace LibraryManagement.View
                     case "3":
                         memberControl.GetPersonById(userID).DisplayBorrowedBookDetails();
                         Console.Write("Enter Book ID to return: ");
-                        string bookIdToReturn = Console.ReadLine();
-                        if (bookControl.ReturnBook(bookIdToReturn))
+                        string bookIdToReturn = Screen.InputId();
+                        if (bookControl.ReturnBook(bookIdToReturn, userID))
                         {
-                            bool availability = true;
-                            bookControl.SetAvailability(bookIdToReturn, availability);
                             Book book = bookControl.GetBookById(bookIdToReturn);
                             memberControl.GetPersonById(userID).BorrowedBooks.Remove(book);
                         }
                         break;
 
                     case "4":
-                        Thread.Sleep(1000);
+
                         memberControl.GetPersonById(userID).DisplayBorrowedBookDetails();
                         Screen.WaitScreen();
                         break;
